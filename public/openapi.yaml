@@ -1,0 +1,537 @@
+openapi: 3.0.0
+info:
+  title: Car Rental API
+  version: 1.0.0
+  description: API for managing car rentals, clients, and cars.
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+
+components:
+  schemas:
+    Car:
+      type: object
+      required:
+        - brand
+        - model
+        - year
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the car
+          readOnly: true
+        brand:
+          type: string
+          example: Toyota
+        model:
+          type: string
+          example: Camry
+        year:
+          type: integer
+          format: int32
+          example: 2022
+        status:
+          type: string
+          enum: [available, rented, maintenance]
+          example: available
+    CarInput:
+      type: object
+      required:
+        - brand
+        - model
+        - year
+        - status
+      properties:
+        brand:
+          type: string
+          example: Toyota
+        model:
+          type: string
+          example: Camry
+        year:
+          type: integer
+          format: int32
+          example: 2022
+        status:
+          type: string
+          enum: [available, rented, maintenance]
+          example: available
+    Client:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - drivingLicenseNumber
+        - contact
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the client
+          readOnly: true
+        firstName:
+          type: string
+          example: Jan
+        lastName:
+          type: string
+          example: Kowalski
+        drivingLicenseNumber:
+          type: string
+          example: "ABC123456"
+        contact:
+          type: string
+          example: "jan.kowalski@example.com"
+    ClientInput:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - drivingLicenseNumber
+        - contact
+      properties:
+        firstName:
+          type: string
+          example: Jan
+        lastName:
+          type: string
+          example: Kowalski
+        drivingLicenseNumber:
+          type: string
+          example: "ABC123456"
+        contact:
+          type: string
+          example: "jan.kowalski@example.com"
+    Rental:
+      type: object
+      required:
+        - clientId
+        - carId
+        - startDate
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the rental
+          readOnly: true
+        clientId:
+          type: string
+          format: uuid
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        carId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        startDate:
+          type: string
+          format: date-time
+          example: "2024-05-20T10:00:00Z"
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2024-05-25T10:00:00Z"
+        status:
+          type: string
+          enum: [active, completed]
+          example: active
+          readOnly: true
+    RentalInput:
+      type: object
+      required:
+        - clientId
+        - carId
+        - startDate
+      properties:
+        clientId:
+          type: string
+          format: uuid
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        carId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        startDate:
+          type: string
+          format: date-time
+          example: "2024-05-20T10:00:00Z"
+
+paths:
+  /cars:
+    get:
+      summary: Pobierz listę samochodów
+      tags: [Cars]
+      responses:
+        "200":
+          description: Lista samochodów
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Car"
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174000"
+                  brand: "Toyota"
+                  model: "Corolla"
+                  year: 2021
+                  status: "available"
+    post:
+      summary: Dodaj nowy samochód
+      tags: [Cars]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarInput"
+            example:
+              brand: "Ford"
+              model: "Focus"
+              year: 2023
+              status: "available"
+      responses:
+        "201":
+          description: Samochód utworzony
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+              example:
+                id: "223e4567-e89b-12d3-a456-426614174001"
+                brand: "Ford"
+                model: "Focus"
+                year: 2023
+                status: "available"
+        "400":
+          description: Błędne dane wejściowe
+  /cars/{carId}:
+    get:
+      summary: Pobierz dane konkretnego samochodu
+      tags: [Cars]
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          description: ID samochodu
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Dane samochodu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                brand: "Toyota"
+                model: "Corolla"
+                year: 2021
+                status: "available"
+        "404":
+          description: Samochód nie znaleziony
+    put:
+      summary: Zaktualizuj dane samochodu
+      tags: [Cars]
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          description: ID samochodu
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarInput"
+            example:
+              brand: "Toyota"
+              model: "Corolla Hybrid"
+              year: 2021
+              status: "rented"
+      responses:
+        "200":
+          description: Samochód zaktualizowany
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                brand: "Toyota"
+                model: "Corolla Hybrid"
+                year: 2021
+                status: "rented"
+        "400":
+          description: Błędne dane wejściowe
+        "404":
+          description: Samochód nie znaleziony
+    delete:
+      summary: Usuń samochód
+      tags: [Cars]
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          description: ID samochodu
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Samochód usunięty
+        "404":
+          description: Samochód nie znaleziony
+        "400":
+          description: Samochód jest aktualnie wypożyczony i nie może zostać usunięty
+
+  /clients:
+    get:
+      summary: Pobierz listę klientów
+      tags: [Clients]
+      responses:
+        "200":
+          description: Lista klientów
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Client"
+              example:
+                - id: "c790f1ee-6c54-4b01-90e6-d701748f0851"
+                  firstName: "Anna"
+                  lastName: "Nowak"
+                  drivingLicenseNumber: "XYZ987654"
+                  contact: "anna.nowak@example.com"
+    post:
+      summary: Dodaj nowego klienta
+      tags: [Clients]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientInput"
+            example:
+              firstName: "Piotr"
+              lastName: "Zieliński"
+              drivingLicenseNumber: "DEF456123"
+              contact: "piotr.zielinski@example.com"
+      responses:
+        "201":
+          description: Klient utworzony
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+              example:
+                id: "d290f1ee-6c54-4b01-90e6-d701748f0852"
+                firstName: "Piotr"
+                lastName: "Zieliński"
+                drivingLicenseNumber: "DEF456123"
+                contact: "piotr.zielinski@example.com"
+        "400":
+          description: Błędne dane wejściowe
+  /clients/{clientId}:
+    get: # Dodano brakującą metodę GET dla pojedynczego klienta, choć nie było wprost w wymaganiach
+      summary: Pobierz dane konkretnego klienta
+      tags: [Clients]
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          description: ID klienta
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Dane klienta
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+              example:
+                id: "c790f1ee-6c54-4b01-90e6-d701748f0851"
+                firstName: "Anna"
+                lastName: "Nowak"
+                drivingLicenseNumber: "XYZ987654"
+                contact: "anna.nowak@example.com"
+        "404":
+          description: Klient nie znaleziony
+    put:
+      summary: Zaktualizuj dane klienta
+      tags: [Clients]
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          description: ID klienta
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientInput"
+            example:
+              firstName: "Anna"
+              lastName: "Nowak-Kowalska"
+              drivingLicenseNumber: "XYZ987654"
+              contact: "anna.nowak.kowalska@example.com"
+      responses:
+        "200":
+          description: Klient zaktualizowany
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+              example:
+                id: "c790f1ee-6c54-4b01-90e6-d701748f0851"
+                firstName: "Anna"
+                lastName: "Nowak-Kowalska"
+                drivingLicenseNumber: "XYZ987654"
+                contact: "anna.nowak.kowalska@example.com"
+        "400":
+          description: Błędne dane wejściowe
+        "404":
+          description: Klient nie znaleziony
+    delete:
+      summary: Usuń klienta
+      tags: [Clients]
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          description: ID klienta
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Klient usunięty
+        "404":
+          description: Klient nie znaleziony
+        "400":
+          description: Klient ma aktywne wypożyczenia i nie może zostać usunięty
+
+  /rentals:
+    get:
+      summary: Pobierz aktualne wypożyczenia
+      tags: [Rentals]
+      responses:
+        "200":
+          description: Lista aktualnych wypożyczeń
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Rental"
+              example:
+                - id: "rental_id_1"
+                  clientId: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+                  carId: "123e4567-e89b-12d3-a456-426614174000"
+                  startDate: "2024-05-20T10:00:00Z"
+                  endDate: null
+                  status: "active"
+    post:
+      summary: Utwórz nowe wypożyczenie
+      tags: [Rentals]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RentalInput"
+            example:
+              clientId: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+              carId: "123e4567-e89b-12d3-a456-426614174000"
+              startDate: "2024-05-22T14:30:00Z"
+      responses:
+        "201":
+          description: Wypożyczenie utworzone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Rental"
+              example:
+                id: "rental_id_2"
+                clientId: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+                carId: "123e4567-e89b-12d3-a456-426614174000"
+                startDate: "2024-05-22T14:30:00Z"
+                endDate: null
+                status: "active"
+        "400":
+          description: Błędne dane wejściowe (np. klient lub samochód nie istnieje, samochód niedostępny)
+        "404":
+          description: Klient lub samochód nie znaleziony
+  /rentals/{rentalId}/finish:
+    put:
+      summary: Zakończ wypożyczenie
+      tags: [Rentals]
+      parameters:
+        - name: rentalId
+          in: path
+          required: true
+          description: ID wypożyczenia
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Wypożyczenie zakończone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Rental"
+              example:
+                id: "rental_id_1"
+                clientId: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+                carId: "123e4567-e89b-12d3-a456-426614174000"
+                startDate: "2024-05-20T10:00:00Z"
+                endDate: "2024-05-22T18:00:00Z"
+                status: "completed"
+        "400":
+          description: Wypożyczenie już zakończone lub nie można zakończyć
+        "404":
+          description: Wypożyczenie nie znalezione
+  /rentals/client/{clientId}/history:
+    get:
+      summary: Pobierz historię wypożyczeń klienta
+      tags: [Rentals]
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          description: ID klienta
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Historia wypożyczeń klienta
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Rental"
+              example:
+                - id: "rental_id_3"
+                  clientId: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+                  carId: "another_car_id"
+                  startDate: "2024-04-10T09:00:00Z"
+                  endDate: "2024-04-15T17:00:00Z"
+                  status: "completed"
+        "404":
+          description: Klient nie znaleziony

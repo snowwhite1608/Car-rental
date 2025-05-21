@@ -4,7 +4,7 @@ const clientController = require("../controllers/clientController");
 
 router.get("/", clientController.getAllClients);
 router.post("/", clientController.createClient);
-router.get("/:clientId", clientController.getClientById); // Dodano endpoint
+router.get("/:clientId", clientController.getClientById);
 router.put("/:clientId", clientController.updateClient);
 router.delete("/:clientId", clientController.deleteClient);
 

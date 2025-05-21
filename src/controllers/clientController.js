@@ -18,12 +18,10 @@ let clients = [
 ];
 let rentals = require("./rentalController").rentals; // Dostęp do wypożyczeń
 
-// Pobierz listę klientów
 exports.getAllClients = (req, res) => {
   res.status(200).json(clients);
 };
 
-// Pobierz dane konkretnego klienta (dodatkowa funkcja, przydatna)
 exports.getClientById = (req, res) => {
   const client = clients.find((c) => c.id === req.params.clientId);
   if (client) {
@@ -33,7 +31,6 @@ exports.getClientById = (req, res) => {
   }
 };
 
-// Dodaj nowego klienta
 exports.createClient = (req, res) => {
   const { firstName, lastName, drivingLicenseNumber, contact } = req.body;
   if (!firstName || !lastName || !drivingLicenseNumber || !contact) {
@@ -42,7 +39,6 @@ exports.createClient = (req, res) => {
         "Brak wszystkich wymaganych pól: firstName, lastName, drivingLicenseNumber, contact",
     });
   }
-  // Prosta walidacja unikalności numeru prawa jazdy
   if (
     clients.some(
       (client) => client.drivingLicenseNumber === drivingLicenseNumber
@@ -64,7 +60,6 @@ exports.createClient = (req, res) => {
   res.status(201).json(newClient);
 };
 
-// Zaktualizuj dane klienta
 exports.updateClient = (req, res) => {
   const clientIndex = clients.findIndex((c) => c.id === req.params.clientId);
   if (clientIndex !== -1) {
@@ -72,7 +67,6 @@ exports.updateClient = (req, res) => {
     if (!firstName && !lastName && !drivingLicenseNumber && !contact) {
       return res.status(400).json({ message: "Brak danych do aktualizacji" });
     }
-    // Walidacja unikalności numeru prawa jazdy, jeśli jest zmieniany
     if (
       drivingLicenseNumber &&
       clients[clientIndex].drivingLicenseNumber !== drivingLicenseNumber &&
@@ -95,10 +89,8 @@ exports.updateClient = (req, res) => {
   }
 };
 
-// Usuń klienta
 exports.deleteClient = (req, res) => {
   const clientId = req.params.clientId;
-  // Sprawdź, czy klient nie ma aktywnych wypożyczeń
   const hasActiveRentals = rentals.some(
     (rental) => rental.clientId === clientId && rental.status === "active"
   );
@@ -117,5 +109,4 @@ exports.deleteClient = (req, res) => {
   }
 };
 
-// Eksport dla innych modułów
 exports.clients = clients;

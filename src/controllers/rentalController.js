@@ -1,6 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
 
-// Przechowywanie danych w pamięci
 let rentals = [
   {
     id: "rental_id_1",
@@ -20,12 +19,9 @@ let rentals = [
   },
 ];
 
-// Dostęp do danych samochodów i klientów (uproszczony, w rzeczywistej aplikacji byłoby to przez serwis/model)
-// Używamy require() wewnątrz funkcji, aby uniknąć problemów z cyklicznymi zależnościami przy starcie aplikacji
 const getCars = () => require("./carController").cars;
 const getClients = () => require("./clientController").clients;
 
-// Utwórz nowe wypożyczenie
 exports.createRental = (req, res) => {
   const { clientId, carId, startDate } = req.body;
   const cars = getCars();
@@ -63,8 +59,6 @@ exports.createRental = (req, res) => {
   };
 
   rentals.push(newRental);
-
-  // Zmiana statusu samochodu na 'rented'
   const carIndex = cars.findIndex((c) => c.id === carId);
   if (carIndex !== -1) {
     cars[carIndex].status = "rented";
@@ -72,8 +66,6 @@ exports.createRental = (req, res) => {
 
   res.status(201).json(newRental);
 };
-
-// Zakończ wypożyczenie
 exports.finishRental = (req, res) => {
   const rentalId = req.params.rentalId;
   const cars = getCars();
@@ -93,7 +85,6 @@ exports.finishRental = (req, res) => {
   rental.endDate = new Date().toISOString();
   rental.status = "completed";
 
-  // Zmiana statusu samochodu na 'available'
   const carIndex = cars.findIndex((c) => c.id === rental.carId);
   if (carIndex !== -1) {
     cars[carIndex].status = "available";
@@ -102,7 +93,6 @@ exports.finishRental = (req, res) => {
   res.status(200).json(rental);
 };
 
-// Pobierz historię wypożyczeń klienta
 exports.getClientRentalHistory = (req, res) => {
   const clientId = req.params.clientId;
   const clients = getClients();
@@ -116,11 +106,9 @@ exports.getClientRentalHistory = (req, res) => {
   res.status(200).json(clientRentals);
 };
 
-// Pobierz aktualne wypożyczenia
 exports.getCurrentRentals = (req, res) => {
   const currentRentals = rentals.filter((r) => r.status === "active");
   res.status(200).json(currentRentals);
 };
 
-// Eksport dla innych modułów
 exports.rentals = rentals;

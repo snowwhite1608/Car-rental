@@ -1,11 +1,11 @@
 openapi: 3.0.0
 info:
-  title: Car Rental API
+  title: Api wypoyczalni samochodów
   version: 1.0.0
-  description: API for managing car rentals, clients, and cars.
+  description: Api do zarządzania samochodami, klientami i wynajmem
 servers:
   - url: http://localhost:8000/api/v1
-    description: Local development server
+    description: Środowisko lokalne
 
 components:
   schemas:
@@ -160,11 +160,11 @@ components:
 paths:
   /cars:
     get:
-      summary: Pobierz listę samochodów
+      summary: get lista aut
       tags: [Cars]
       responses:
         "200":
-          description: Lista samochodów
+          description: Lista aut
           content:
             application/json:
               schema:
@@ -178,7 +178,7 @@ paths:
                   year: 2021
                   status: "available"
     post:
-      summary: Dodaj nowy samochód
+      summary: post dodaj auto
       tags: [Cars]
       requestBody:
         required: true
@@ -205,22 +205,22 @@ paths:
                 year: 2023
                 status: "available"
         "400":
-          description: Błędne dane wejściowe
+          description: zle dane
   /cars/{carId}:
     get:
-      summary: Pobierz dane konkretnego samochodu
+      summary: get konkretne auto
       tags: [Cars]
       parameters:
         - name: carId
           in: path
           required: true
-          description: ID samochodu
+          description: Car ID
           schema:
             type: string
             format: uuid
       responses:
         "200":
-          description: Dane samochodu
+          description: Dane auta
           content:
             application/json:
               schema:
@@ -232,15 +232,15 @@ paths:
                 year: 2021
                 status: "available"
         "404":
-          description: Samochód nie znaleziony
+          description: brak samochodu
     put:
-      summary: Zaktualizuj dane samochodu
+      summary: uaktualnij samochod
       tags: [Cars]
       parameters:
         - name: carId
           in: path
           required: true
-          description: ID samochodu
+          description: Car ID
           schema:
             type: string
             format: uuid
@@ -257,7 +257,7 @@ paths:
               status: "rented"
       responses:
         "200":
-          description: Samochód zaktualizowany
+          description: Samochod zaktualizowany
           content:
             application/json:
               schema:
@@ -269,9 +269,9 @@ paths:
                 year: 2021
                 status: "rented"
         "400":
-          description: Błędne dane wejściowe
+          description: Złe dane
         "404":
-          description: Samochód nie znaleziony
+          description: Brak auta
     delete:
       summary: Usuń samochód
       tags: [Cars]
@@ -279,7 +279,7 @@ paths:
         - name: carId
           in: path
           required: true
-          description: ID samochodu
+          description: Car ID
           schema:
             type: string
             format: uuid
@@ -287,13 +287,13 @@ paths:
         "204":
           description: Samochód usunięty
         "404":
-          description: Samochód nie znaleziony
+          description: Brak auta
         "400":
-          description: Samochód jest aktualnie wypożyczony i nie może zostać usunięty
+          description: Samochód wypozyczony
 
   /clients:
     get:
-      summary: Pobierz listę klientów
+      summary: get lista klientow
       tags: [Clients]
       responses:
         "200":
@@ -306,10 +306,10 @@ paths:
                   $ref: "#/components/schemas/Client"
               example:
                 - id: "c790f1ee-6c54-4b01-90e6-d701748f0851"
-                  firstName: "Anna"
+                  firstName: "Jan"
                   lastName: "Nowak"
                   drivingLicenseNumber: "XYZ987654"
-                  contact: "anna.nowak@example.com"
+                  contact: "jan.nowak@example.com"
     post:
       summary: Dodaj nowego klienta
       tags: [Clients]
@@ -340,7 +340,7 @@ paths:
         "400":
           description: Błędne dane wejściowe
   /clients/{clientId}:
-    get: # Dodano brakującą metodę GET dla pojedynczego klienta, choć nie było wprost w wymaganiach
+    get:
       summary: Pobierz dane konkretnego klienta
       tags: [Clients]
       parameters:
